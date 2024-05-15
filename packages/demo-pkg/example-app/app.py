@@ -18,7 +18,7 @@ app_ui = ui.page_fluid(
     ),
     ui.card(
         ui.card_header("React"),
-        react_input("reactInput"),
+        react_input("reactInput", label="Hello from Python!"),
         react_output("reactOutput"),
     ),
     ui.card(

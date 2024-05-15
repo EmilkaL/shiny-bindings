@@ -23671,7 +23671,10 @@
       selector,
       setup: (el, updateValue) => {
         updateValue(initialValue);
+        const props = JSON.parse(el.dataset.props || "{}");
+        delete el.dataset.props;
         (0, import_client.createRoot)(el).render(renderComp({
+          ...props,
           initialValue,
           updateValue: (x2) => updateValue(x2, priority === "deferred")
         }));
@@ -23714,19 +23717,16 @@
           padding: "1rem"
         }
       },
-      "I'm a react output with value ",
+      "I am a react output with value: ",
       /* @__PURE__ */ import_react.default.createElement("strong", null, value)
     )
   });
   makeReactInput({
     name: "custom-react-input",
     initialValue: 0,
-    renderComp: ({ initialValue, updateValue }) => /* @__PURE__ */ import_react.default.createElement(MyInput, { value: initialValue, updateValue })
+    renderComp: (props) => /* @__PURE__ */ import_react.default.createElement(MyInput, { ...props })
   });
-  function MyInput({
-    value,
-    updateValue
-  }) {
+  function MyInput({ label, value, updateValue }) {
     const [val, setVal] = import_react.default.useState(value);
     return /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement(
       "button",
@@ -23737,7 +23737,7 @@
           updateValue(newVal);
         }
       },
-      "React"
+      label
     ));
   }
 

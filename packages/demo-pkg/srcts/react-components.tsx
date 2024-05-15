@@ -20,21 +20,19 @@ makeReactOutput<Payload>({
   ),
 });
 
-makeReactInput<number>({
-  name: "custom-react-input",
-  initialValue: 0,
-  renderComp: ({ initialValue, updateValue }) => (
-    <MyInput value={initialValue} updateValue={updateValue} />
-  ),
-});
-
-function MyInput({
-  value,
-  updateValue,
-}: {
+interface MyInputProps {
+  label: string;
   value: number;
   updateValue: (val: number) => void;
-}) {
+}
+
+makeReactInput<number, MyInputProps>({
+  name: "custom-react-input",
+  initialValue: 0,
+  renderComp: (props) => <MyInput {...props} />,
+});
+
+function MyInput({ label, value, updateValue }: MyInputProps) {
   const [val, setVal] = React.useState(value);
 
   return (
@@ -46,7 +44,7 @@ function MyInput({
           updateValue(newVal);
         }}
       >
-        React
+        {label}
       </button>
     </>
   );
