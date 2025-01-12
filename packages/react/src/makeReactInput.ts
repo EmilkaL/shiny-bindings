@@ -34,7 +34,7 @@ function replaceElement(el) {
       const id = obj['__id__'];
       const element = document.getElementById(id);
       element.parentNode.removeChild(element);
-      return React.createElement('div', null, element);
+      return React.createElement('div', null, "element");
     }
 
     // Recursively process properties
