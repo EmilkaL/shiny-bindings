@@ -1,6 +1,6 @@
 import { makeInputBinding } from "@posit-dev/shiny-bindings-core";
 import React from "react";
-import type { ReactNode } from "react";
+import { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 /**
@@ -25,14 +25,6 @@ function replaceElement(el) {
     console.error('Invalid JSON in data-props attribute:', e);
     return;
   }
-  const toReactNode = (htmlElement) => {
-    // Создаем контейнер для портал
-  
-    // Возвращаем портал, который оборачивает переданный элемент
-
-    return React.createElement('div', null, htmlElement);
-  };
-
   // Function to recursively replace __id__ with the DOM element
   function replaceIdWithElement(obj) {
     if (typeof obj !== 'object' || obj === null) return obj;
@@ -42,7 +34,7 @@ function replaceElement(el) {
       const id = obj['__id__'];
       const element = document.getElementById(id);
       element.parentNode.removeChild(element);
-      return toReactNode(element) || toReactNode(obj); // Return the element or the original object if not found
+      return React.createElement('div', null, element);
     }
 
     // Recursively process properties
