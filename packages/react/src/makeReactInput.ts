@@ -16,7 +16,6 @@ import { createRoot } from "react-dom/client";
 function replaceElement(el) {
   // Get the data-props attribute and parse it as JSON
   const dataPropsAttr = el.getAttribute('data-props');
-  const container = el
   if (!dataPropsAttr) return;
 
   let dataProps;
@@ -27,12 +26,7 @@ function replaceElement(el) {
     return;
   }
   const toReactNode = (htmlElement) => {
-    // Создаем контейнер для портала
-    container.appendChild(htmlElement);
-  
-    // Возвращаем портал, который оборачивает переданный элемент
-
-    return ReactDOM.createPortal(htmlElement, container);
+    return (<div>{htmlElement}</div>);
   };
 
   // Function to recursively replace __id__ with the DOM element
