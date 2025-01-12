@@ -1,5 +1,6 @@
 import { makeInputBinding } from "@posit-dev/shiny-bindings-core";
-import type { ReactNode, React } from "react";
+import React from "react";
+import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 /**
