@@ -13,7 +13,7 @@ import { createRoot } from "react-dom/client";
  * @param priority Should the value be immediately updated wait to the next even loop? Typically set at "immediate."
  */
 
-function replaceElement(el) {
+function replaceElement(el, container) {
   // Get the data-props attribute and parse it as JSON
   const dataPropsAttr = el.getAttribute('data-props');
   if (!dataPropsAttr) return;
@@ -25,26 +25,29 @@ function replaceElement(el) {
     console.error('Invalid JSON in data-props attribute:', e);
     return;
   }
-  const toReactNode = (htmlElement) => {
-    // Создаем контейнер для портала
-    const container = document.createElement("div");
-    container.appendChild(htmlElement);
-  
-    // Возвращаем портал, который оборачивает переданный элемент
 
+  // Function to create a React portal for a given HTML element
+  const toReactNode = (htmlElement) => {
+    container.appendChild(htmlElement);
     return ReactDOM.createPortal(htmlElement, container);
   };
 
-  // Function to recursively replace __id__ with the DOM element
+  // Function to recursively replace objects with id: "__id__" with DOM elements
   function replaceIdWithElement(obj) {
     if (typeof obj !== 'object' || obj === null) return obj;
 
-    // If the object has a __id__, replace it with the DOM element
-    if ('__id__' in obj) {
-      const id = obj['__id__'];
+    if (Array.isArray(obj)) {
+      return obj.map((item) => replaceIdWithElement(item));
+    }
+
+    if (obj.id === "__id__") {
+      const id = obj.id;
       const element = document.getElementById(id);
-      element.parentNode.removeChild(element);
-      return toReactNode(element) || toReactNode(obj); // Return the element or the original object if not found
+      if (element) {
+        element.parentNode.removeChild(element);
+        return toReactNode(element);
+      }
+      return obj; // or handle the case when element is not found
     }
 
     // Recursively process properties
@@ -56,9 +59,9 @@ function replaceElement(el) {
     return obj;
   }
 
-  // Replace __id__ in dataProps
+  // Replace objects with id: "__id__" in dataProps
   const modifiedDataProps = replaceIdWithElement(dataProps);
-  return modifiedDataProps
+  return modifiedDataProps;
 }
 
 export function makeReactInput<T, P extends Object>({
