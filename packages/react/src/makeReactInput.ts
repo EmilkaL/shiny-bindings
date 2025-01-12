@@ -1,5 +1,5 @@
 import { makeInputBinding } from "@posit-dev/shiny-bindings-core";
-import React from "react";
+import parse from 'html-react-parser';
 import { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -34,7 +34,7 @@ function replaceElement(el) {
       const id = obj['__id__'];
       const element = document.getElementById(id);
       element.parentNode.removeChild(element);
-      return React.createElement('div', null, "element");
+      return parse(element.outerHTML);
     }
 
     // Recursively process properties
