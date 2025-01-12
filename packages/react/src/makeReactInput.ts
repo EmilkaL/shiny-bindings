@@ -1,6 +1,5 @@
 import { makeInputBinding } from "@posit-dev/shiny-bindings-core";
-import type { ReactNode } from "react";
-import ReactDOM from "react-dom";
+import type { ReactNode, React } from "react";
 import { createRoot } from "react-dom/client";
 
 /**
@@ -26,7 +25,11 @@ function replaceElement(el) {
     return;
   }
   const toReactNode = (htmlElement) => {
-    return (<div>{htmlElement}</div>);
+    // Создаем контейнер для портал
+  
+    // Возвращаем портал, который оборачивает переданный элемент
+
+    return React.createElement('div', null, htmlElement);
   };
 
   // Function to recursively replace __id__ with the DOM element
