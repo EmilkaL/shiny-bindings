@@ -1,5 +1,6 @@
 import { makeInputBinding } from "@posit-dev/shiny-bindings-core";
 import type { ReactNode } from "react";
+import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 
 /**
@@ -11,6 +12,55 @@ import { createRoot } from "react-dom/client";
  * @param renderComp A function that renders the react component into the custom element
  * @param priority Should the value be immediately updated wait to the next even loop? Typically set at "immediate."
  */
+
+function replaceElement(el) {
+  // Get the data-props attribute and parse it as JSON
+  const dataPropsAttr = el.getAttribute('data-props');
+  if (!dataPropsAttr) return;
+
+  let dataProps;
+  try {
+    dataProps = JSON.parse(dataPropsAttr);
+  } catch (e) {
+    console.error('Invalid JSON in data-props attribute:', e);
+    return;
+  }
+  const toReactNode = (htmlElement) => {
+    // Создаем контейнер для портала
+    const container = document.createElement("div");
+    container.appendChild(htmlElement);
+  
+    // Возвращаем портал, который оборачивает переданный элемент
+
+    return ReactDOM.createPortal(htmlElement, container);
+  };
+
+  // Function to recursively replace __id__ with the DOM element
+  function replaceIdWithElement(obj) {
+    if (typeof obj !== 'object' || obj === null) return obj;
+
+    // If the object has a __id__, replace it with the DOM element
+    if ('__id__' in obj) {
+      const id = obj['__id__'];
+      const element = document.getElementById(id);
+      element.parentNode.removeChild(element);
+      return toReactNode(element) || toReactNode(obj); // Return the element or the original object if not found
+    }
+
+    // Recursively process properties
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        obj[key] = replaceIdWithElement(obj[key]);
+      }
+    }
+    return obj;
+  }
+
+  // Replace __id__ in dataProps
+  const modifiedDataProps = replaceIdWithElement(dataProps);
+  return modifiedDataProps
+}
+
 export function makeReactInput<T, P extends Object>({
   name,
   selector,
@@ -35,7 +85,7 @@ export function makeReactInput<T, P extends Object>({
       updateValue(initialValue);
 
       // Get the component props from `data-props` attribute
-      const props = JSON.parse(el.dataset.props || "{}");
+      const props = replaceElement(el)
 
       // Remove the `data-props` attribute to keep the DOM clean
       delete el.dataset.props
