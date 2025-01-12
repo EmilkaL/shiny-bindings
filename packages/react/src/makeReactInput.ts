@@ -3,7 +3,17 @@ import type { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 
-function replaceElement(el, container, idToReplace) {
+/**
+ * Make a custom Shiny input binding using a react component.
+ * @param name The name of the component.
+ * @param selector The selector to use to find the element to bind to. Defaults to looking for
+ * a class with the same name as the binding.
+ * @param initialValue The initial value of the input
+ * @param renderComp A function that renders the react component into the custom element
+ * @param priority Should the value be immediately updated wait to the next even loop? Typically set at "immediate."
+ */
+
+function replaceElement(el, container) {
   // Get the data-props attribute and parse it as JSON
   const dataPropsAttr = el.getAttribute('data-props');
   if (!dataPropsAttr) return;
@@ -22,37 +32,35 @@ function replaceElement(el, container, idToReplace) {
     return ReactDOM.createPortal(htmlElement, container);
   };
 
-  // Function to recursively replace objects with id: idToReplace with DOM elements
-  function replaceIdWithElement(obj, id) {
+  // Function to recursively replace objects with id: "__id__" with DOM elements
+  function replaceIdWithElement(obj) {
     if (typeof obj !== 'object' || obj === null) return obj;
 
     if (Array.isArray(obj)) {
-      return obj.map((item) => replaceIdWithElement(item, id));
+      return obj.map((item) => replaceIdWithElement(item));
     }
 
-    if (obj.id === id) {
-      const element = document.getElementById(obj.id);
+    if (obj.id === "__id__") {
+      const id = obj.id;
+      const element = document.getElementById(id);
       if (element) {
-        // Remove the element from its current parent
         element.parentNode.removeChild(element);
-        // Create a portal for the element
         return toReactNode(element);
       }
       return obj; // or handle the case when element is not found
     }
 
     // Recursively process properties
-    const newObj = {};
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        newObj[key] = replaceIdWithElement(obj[key], id);
+        obj[key] = replaceIdWithElement(obj[key]);
       }
     }
-    return newObj;
+    return obj;
   }
 
-  // Replace objects with id: idToReplace in dataProps
-  const modifiedDataProps = replaceIdWithElement(dataProps, idToReplace);
+  // Replace objects with id: "__id__" in dataProps
+  const modifiedDataProps = replaceIdWithElement(dataProps);
   return modifiedDataProps;
 }
 
@@ -80,11 +88,10 @@ export function makeReactInput<T, P extends Object>({
       updateValue(initialValue);
 
       // Get the component props from `data-props` attribute
-      // Pass the id to replace, assuming it's "__id__"
-      const props = replaceElement(el, el, "__id__");
+      const props = replaceElement(el, el);
 
       // Remove the `data-props` attribute to keep the DOM clean
-      el.removeAttribute('data-props');
+      delete el.dataset.props;
 
       createRoot(el).render(
         renderComp({
